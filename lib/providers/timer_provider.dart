@@ -9,6 +9,7 @@ class TimerState {
   final int remainingTime;
   final bool isRunning;
   final bool isBreak;
+  final bool isPaused;
   final bool soundEnabled;
 
   TimerState({
@@ -19,6 +20,7 @@ class TimerState {
     required this.remainingTime,
     required this.isRunning,
     required this.isBreak,
+    required this.isPaused,
     required this.soundEnabled,
   });
 
@@ -30,6 +32,7 @@ class TimerState {
     int? remainingTime,
     bool? isRunning,
     bool? isBreak,
+    bool? isPaused,
     bool? soundEnabled,
   }) {
     return TimerState(
@@ -40,6 +43,7 @@ class TimerState {
       remainingTime: remainingTime ?? this.remainingTime,
       isRunning: isRunning ?? this.isRunning,
       isBreak: isBreak ?? this.isBreak,
+      isPaused: isPaused ?? this.isPaused,
       soundEnabled: soundEnabled ?? this.soundEnabled,
     );
   }
@@ -59,6 +63,7 @@ class TimerNotifier extends StateNotifier<TimerState> {
     remainingTime: 10, // Set initial break duration
     isRunning: false,
     isBreak: true,  // Start with break period
+    isPaused: false,
     soundEnabled: false,
   ));
 
@@ -68,7 +73,7 @@ class TimerNotifier extends StateNotifier<TimerState> {
     _timer?.cancel();
     _timeStreamController.add(state.remainingTime);
 
-    state = state.copyWith(isRunning: true);
+    state = state.copyWith(isRunning: true, isPaused: false);
 
     _timer = Timer.periodic(Duration(seconds: 1), (timer) {
       if (state.remainingTime > 0) {
@@ -118,9 +123,16 @@ class TimerNotifier extends StateNotifier<TimerState> {
 
   void reset() {
     _timer?.cancel();
-    state = state.copyWith(
-      remainingTime: state.isBreak ? state.breakDuration : state.activeDuration,
+    state = TimerState(
+      activeDuration: 10,
+      breakDuration: 10,
+      rounds: 1,
+      currentRound: 1,
+      remainingTime: 10,
       isRunning: false,
+      isBreak: true,
+      isPaused: false,
+      soundEnabled: false,
     );
     _timeStreamController.add(state.remainingTime);
   }
@@ -146,6 +158,20 @@ class TimerNotifier extends StateNotifier<TimerState> {
 
   void toggleSound() {
     state = state.copyWith(soundEnabled: !state.soundEnabled);
+  }
+
+  void pause() {
+    if (state.isRunning) {
+      _timer?.cancel();
+      state = state.copyWith(isPaused: true, isRunning: false);
+    }
+  }
+
+  void resume() {
+    if (state.isPaused) {
+      start();
+      state = state.copyWith(isPaused: false, isRunning: true);
+    }
   }
 }
 

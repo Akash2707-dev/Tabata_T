@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:getwidget/getwidget.dart';
 import '../providers/timer_provider.dart';
 import '../assets/progress_overlay.dart';  // Import ProgressOverlay
+import '../assets/drawer.dart';  // Import AppDrawer
 
 class TimerScreen extends ConsumerWidget {
   @override
@@ -14,21 +15,28 @@ class TimerScreen extends ConsumerWidget {
     final backgroundColor = timerState.isBreak ? Colors.greenAccent.shade100 : Colors.redAccent.shade200;
 
     return Scaffold(
+      // Add the drawer to the Scaffold
+      drawer: AppDrawer(),
       appBar: AppBar(
         backgroundColor: Colors.white,  // Set AppBar background to white
-        title: Row(
-          children: [
-            CircleAvatar(
-              backgroundImage: NetworkImage('https://media.istockphoto.com/id/665421358/vector/muscular-arm-icon.jpg?s=612x612&w=0&k=20&c=4LhJnPcnm1SBeZDrtPvEktjuvYIXGXubO1TMAaFrDXs='),  // Replace with your network image URL
-              radius: 20,  // Set the radius of the CircleAvatar
-            ),
-            SizedBox(width: 10),
-            Text(
-              'Tabata Timer',
-              style: TextStyle(color: Colors.black),  // Set text color to black
-            ),
-          ],
+        title: Text(
+          'Tabata Timer',
+          style: TextStyle(color: Colors.black),  // Set text color to black
         ),
+        leading: Builder(
+          builder: (context) => IconButton(
+            icon: CircleAvatar(
+              backgroundImage: NetworkImage('https://media.istockphoto.com/id/665421358/vector/muscular-arm-icon.jpg?s=612x612&w=0&k=20&c=4LhJnPcnm1SBeZDrtPvEktjuvYIXGXubO1TMAaFrDXs='),  // Replace with your network image URL
+              radius: 24,  // Set the radius of the CircleAvatar
+            ),
+            onPressed: () {
+              // Open the drawer when the CircleAvatar is tapped
+              Scaffold.of(context).openDrawer();
+            },
+          ),
+        ),
+        toolbarHeight: 56.0,  // Set toolbar height to default size (or adjust as needed)
+        elevation: 0,  // Remove shadow for a flat AppBar
       ),
       body: Stack(
         children: [
@@ -114,7 +122,7 @@ class TimerScreen extends ConsumerWidget {
                       ),
                       SizedBox(width: 10),
                       GFButton(
-                        onPressed: timerState.isRunning ? timerNotifier.stop : null,
+                        onPressed: timerState.isRunning ? timerNotifier.pause : null,
                         text: 'Pause',
                         shape: GFButtonShape.pills,
                         type: GFButtonType.outline,
@@ -132,12 +140,14 @@ class TimerScreen extends ConsumerWidget {
               ),
             ),
           ),
-          if (timerState.isRunning || timerState.currentRound > timerState.rounds)
+          // Display ProgressOverlay only if running or paused
+          if (timerState.isRunning || timerState.isPaused || timerState.currentRound > timerState.rounds)
             ProgressOverlay(
               progress: timerState.isBreak
                   ? (timerState.breakDuration - timerState.remainingTime) / timerState.breakDuration
                   : (timerState.activeDuration - timerState.remainingTime) / timerState.activeDuration,
               isTimerFinished: !timerState.isRunning && timerState.currentRound > timerState.rounds,
+              isPaused: timerState.isPaused,
             ),
         ],
       ),
