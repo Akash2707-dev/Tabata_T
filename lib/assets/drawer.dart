@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../screens/step_calculator_screen.dart';
 
 class AppDrawer extends StatelessWidget {
   @override
@@ -81,12 +82,16 @@ class AppDrawer extends StatelessWidget {
                   },
                 ),
                 ListTile(
-                  leading: Icon(Icons.directions_run_sharp, color: Colors.green),  // Icon for Option 2
+                  leading: Icon(Icons.directions_run_sharp, color: Colors.green),  // Icon for Step Calculator
                   title: Text('Step Calculator'),
                   onTap: () {
-                    // Handle Option 2
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => StepCalculatorScreen()),  // Navigate to StepCalculatorScreen
+                    );
                   },
                 ),
+
                 // Add more options as needed
               ],
             ),
