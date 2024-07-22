@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class TimerState {
@@ -52,6 +53,10 @@ class TimerState {
 class TimerNotifier extends StateNotifier<TimerState> {
   Timer? _timer;
   final StreamController<int> _timeStreamController = StreamController<int>.broadcast();
+  AudioPlayer? _audioPlayer;
+  bool _soundReady = false;
+  bool _isSoundPlaying = false;
+  bool _isPreloading = false;
 
   Stream<int> get timeStream => _timeStreamController.stream;
 
@@ -60,12 +65,14 @@ class TimerNotifier extends StateNotifier<TimerState> {
     breakDuration: 10,
     rounds: 1,
     currentRound: 1,
-    remainingTime: 10, // Set initial break duration
+    remainingTime: 10,
     isRunning: false,
-    isBreak: true,  // Start with break period
+    isBreak: true,
     isPaused: false,
     soundEnabled: false,
-  ));
+  )) {
+    _initializeAudioPlayer();
+  }
 
   void start() {
     if (state.isRunning) return;
@@ -79,39 +86,42 @@ class TimerNotifier extends StateNotifier<TimerState> {
       if (state.remainingTime > 0) {
         state = state.copyWith(remainingTime: state.remainingTime - 1);
         _timeStreamController.add(state.remainingTime);
+
+        if (state.soundEnabled && state.remainingTime == 3 && !_isSoundPlaying) {
+          _playSound();
+        }
       } else {
         if (state.isBreak) {
-          // Switch to active round after break
           state = state.copyWith(
             isBreak: false,
             remainingTime: state.activeDuration,
           );
+          _preloadSound(); // Preload sound for active round
         } else {
           if (state.currentRound < state.rounds) {
-            // Move to the break period
             state = state.copyWith(
               currentRound: state.currentRound + 1,
               isBreak: true,
               remainingTime: state.breakDuration,
             );
+            _preloadSound(); // Preload sound for break round
           } else {
-            // Complete all rounds and reset
             state = state.copyWith(
               isRunning: false,
               isBreak: true,
-              currentRound: 1, // Reset to the first round
-              remainingTime: state.breakDuration, // Reset remaining time to break duration
+              currentRound: 1,
+              remainingTime: state.breakDuration,
             );
             _timer?.cancel();
             _timeStreamController.add(state.remainingTime);
           }
         }
 
-        if (state.soundEnabled) {
-          // Play sound
+        if (state.soundEnabled && _isSoundPlaying) {
+          _stopSound();
+        } else {
+          _preloadSound();
         }
-
-        _timeStreamController.add(state.remainingTime);
       }
     });
   }
@@ -119,10 +129,19 @@ class TimerNotifier extends StateNotifier<TimerState> {
   void stop() {
     _timer?.cancel();
     state = state.copyWith(isRunning: false);
+    if (_isSoundPlaying) {
+      _stopSound();
+    }
   }
 
-  void reset() {
+  Future<void> reset() async {
+    // Stop timer and sound
     _timer?.cancel();
+    if (_isSoundPlaying) {
+      await _stopSound();
+    }
+
+    // Reset state
     state = TimerState(
       activeDuration: 10,
       breakDuration: 10,
@@ -132,9 +151,20 @@ class TimerNotifier extends StateNotifier<TimerState> {
       isRunning: false,
       isBreak: true,
       isPaused: false,
-      soundEnabled: false,
+      soundEnabled: state.soundEnabled, // Keep the current sound setting
     );
     _timeStreamController.add(state.remainingTime);
+
+    // Reinitialize audio player
+    await _resetAudioPlayer();
+
+    // Preload sound and play if sound is enabled
+    if (state.soundEnabled) {
+      await _preloadSound();
+      if (state.remainingTime == 3) {
+        await _playSound();
+      }
+    }
   }
 
   void setActiveDuration(int duration) {
@@ -171,6 +201,73 @@ class TimerNotifier extends StateNotifier<TimerState> {
     if (state.isPaused) {
       start();
       state = state.copyWith(isPaused: false, isRunning: true);
+    }
+  }
+
+  Future<void> _initializeAudioPlayer() async {
+    _audioPlayer = AudioPlayer();
+    print('Audio player initialized.');
+    await _preloadSound(); // Preload sound immediately after initializing
+  }
+
+  Future<void> _resetAudioPlayer() async {
+    _audioPlayer?.dispose(); // Dispose current player
+    _audioPlayer = AudioPlayer(); // Reinitialize audio player
+    print('Audio player reinitialized.');
+    await _preloadSound(); // Preload sound after reinitialization
+  }
+
+  Future<void> _preloadSound() async {
+    if (_audioPlayer == null) return;
+
+    if (_isPreloading) return; // Avoid redundant preloading
+    _isPreloading = true;
+
+    try {
+      print('Preloading sound...');
+      await _audioPlayer!.setSource(UrlSource('https://drive.google.com/uc?export=download&id=1PVMwKDeQjIHaXnARvvtmBQJ45mgM1rFt')).timeout(Duration(seconds: 10));
+      _soundReady = true; // Mark sound as ready
+      print('Sound preloaded successfully.');
+    } catch (e) {
+      print('Error preloading sound: $e');
+    } finally {
+      _isPreloading = false;
+    }
+  }
+
+  Future<void> _playSound() async {
+    if (!_soundReady) {
+      print('Sound not ready. Preloading...');
+      await _preloadSound();
+    }
+
+    if (_soundReady) {
+      try {
+        print('Playing sound...');
+        await _audioPlayer!.play(UrlSource('https://drive.google.com/uc?export=download&id=1PVMwKDeQjIHaXnARvvtmBQJ45mgM1rFt'));
+        _isSoundPlaying = true;
+        print('Sound is playing.');
+      } catch (e) {
+        print('Error playing sound: $e');
+      }
+    } else {
+      print('Sound is not ready to play.');
+    }
+  }
+
+  Future<void> _stopSound() async {
+    if (_audioPlayer != null) {
+      try {
+        print('Stopping sound...');
+        await _audioPlayer!.stop();
+        _isSoundPlaying = false;
+        print('Sound stopped.');
+
+        // Ensure sound is preloaded immediately after stopping
+        await _preloadSound();
+      } catch (e) {
+        print('Error stopping sound: $e');
+      }
     }
   }
 }

@@ -50,7 +50,7 @@ class TimerScreen extends ConsumerWidget {
                 children: <Widget>[
                   Text(
                     timerState.isBreak ? 'Break' : 'Active',
-                    style: Theme.of(context).textTheme.headline4,
+                    style: Theme.of(context).textTheme.headlineMedium,
                   ),
                   SizedBox(height: 20),
                   StreamBuilder<int>(
@@ -59,14 +59,14 @@ class TimerScreen extends ConsumerWidget {
                       final remainingTime = snapshot.data ?? timerState.remainingTime;
                       return Text(
                         _formatTime(remainingTime),
-                        style: Theme.of(context).textTheme.headline2,
+                        style: Theme.of(context).textTheme.displayMedium,
                       );
                     },
                   ),
                   SizedBox(height: 20),
                   Text(
                     'Round ${timerState.currentRound}/${timerState.rounds}',
-                    style: Theme.of(context).textTheme.headline6,
+                    style: Theme.of(context).textTheme.titleLarge,
                   ),
                   SizedBox(height: 20),
                   _buildDurationInput(
@@ -95,7 +95,7 @@ class TimerScreen extends ConsumerWidget {
                     children: [
                       Text(
                         'Enable sound',
-                        style: Theme.of(context).textTheme.subtitle1,
+                        style: Theme.of(context).textTheme.titleMedium,
                       ),
                       SizedBox(width: 10),
                       GFToggle(
@@ -169,7 +169,7 @@ class TimerScreen extends ConsumerWidget {
         Text(
           label,
           textAlign: TextAlign.center,
-          style: Theme.of(context).textTheme.subtitle1,
+          style: Theme.of(context).textTheme.titleMedium,
         ),
         SizedBox(height: 8),
         Row(
@@ -219,7 +219,7 @@ class TimerScreen extends ConsumerWidget {
         Text(
           label,
           textAlign: TextAlign.center,
-          style: Theme.of(context).textTheme.subtitle1,
+          style: Theme.of(context).textTheme.titleMedium,
         ),
         SizedBox(height: 8),
         Row(

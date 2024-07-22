@@ -61,27 +61,6 @@ class AppDrawer extends StatelessWidget {
               padding: EdgeInsets.zero,  // Remove the default padding
               children: <Widget>[
                 ListTile(
-                  leading: Icon(Icons.timer, color: Colors.green),  // Icon for Option 1
-                  title: Text('Timer'),
-                  onTap: () {
-                    // Handle Option 1
-                  },
-                ),
-                ListTile(
-                  leading: Icon(Icons.sports_martial_arts_sharp, color: Colors.green),  // Icon for Option 2
-                  title: Text('Create a Workout'),
-                  onTap: () {
-                    // Handle Option 2
-                  },
-                ),
-                ListTile(
-                  leading: Icon(Icons.share_arrival_time_sharp, color: Colors.green),  // Icon for Option 2
-                  title: Text('Reminders'),
-                  onTap: () {
-                    // Handle Option 2
-                  },
-                ),
-                ListTile(
                   leading: Icon(Icons.directions_run_sharp, color: Colors.green),  // Icon for Step Calculator
                   title: Text('Step Calculator'),
                   onTap: () {
@@ -91,7 +70,6 @@ class AppDrawer extends StatelessWidget {
                     );
                   },
                 ),
-
                 // Add more options as needed
               ],
             ),
