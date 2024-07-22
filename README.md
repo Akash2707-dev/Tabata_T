@@ -6,7 +6,7 @@ P.S :- Please give suggestions and tips on how to write production ready code , 
 
 ## Getting Started
 
-A simple App that helps you with your interval training with the help of a timer , reminders that you set , create a workout for sets and a step calculator (pedometer) 
+A simple App that helps you with your interval training with the help of a timer and a step calculator (pedometer) 
 
 used packages -
 
