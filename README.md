@@ -15,3 +15,4 @@ used packages -
 - flutter_launcher_icons
 - pedometer
 - permission_handler
+- audioplayers
