@@ -89,7 +89,7 @@ class StepCalculatorScreen extends ConsumerWidget {
                     stepCounterNotifier.startCounting();
                   },
                   style: ElevatedButton.styleFrom(
-                    primary: Colors.green,
+                    backgroundColor: Colors.green,
                   ),
                   child: Text('Start'),
                 ),
@@ -100,7 +100,7 @@ class StepCalculatorScreen extends ConsumerWidget {
                   }
                       : null,
                   style: ElevatedButton.styleFrom(
-                    primary: Colors.orange,
+                    backgroundColor: Colors.orange,
                   ),
                   child: Text('Pause'),
                 ),
@@ -111,7 +111,7 @@ class StepCalculatorScreen extends ConsumerWidget {
                   }
                       : null,
                   style: ElevatedButton.styleFrom(
-                    primary: Colors.red,
+                    backgroundColor: Colors.red,
                   ),
                   child: Text('Reset'),
                 ),
